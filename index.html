@@ -1,0 +1,197 @@
+<html style="font-family: 'arial';">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Device API Tests</title>
+        <script>
+            function getDateTimeString() {
+                const date = new Date();
+
+                return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+            }
+
+            async function postApiRequest(url = '', data = {}) {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    credentials: 'same-origin',
+                    redirect: 'follow',
+                    referrerPolicy: 'no-referrer',
+                    body: JSON.stringify(data)
+                });
+
+                return response.json();
+            }
+
+            function setElementText(elementId, data) {
+                const text = typeof data === "object" ? JSON.stringify(data) : data;
+                document.getElementById(elementId).innerText = text;
+            }
+
+            function getSettings() {
+                setElementText("getDeviceSettingsResponse", `Getting Settings from device.`);
+                fetch("http://127.0.0.1:3000/api/settings")
+                    .then((response) => response.json())
+                    .then((response) => {
+                        setElementText("getDeviceSettingsResponse", response);
+                    })
+                    .catch((error) => {
+                        setElementText("getDeviceSettingsResponse", error.message);
+                    });
+            }
+
+            function setSettings(timeZone) {
+                setElementText("setDeviceSettingsResponse", `Setting time zone to device.`);
+                postApiRequest(`http://127.0.0.1:3000/api/settings?timeZone=${timeZone}`)
+                    .then((response) => {
+                        setElementText("setDeviceSettingsResponse", response);
+                    })
+                    .catch((error) => {
+                        setElementText("setDeviceSettingsResponse", error.message);
+                    });
+            }
+
+            function getLedsApi() {
+                setElementText("getLedsColorApiResponse", `Getting LED colors from device.`);
+                fetch("http://127.0.0.1:3000/api/leds")
+                    .then((response) => response.json())
+                    .then((response) => {
+                        setElementText("getLedsColorApiResponse", response);
+                    })
+                    .catch((error) => {
+                        setElementText("getLedsColorApiResponse", error.message);
+                    });
+            }
+
+            function postLedsApi(color, ledsOption) {
+                setElementText("setLedsColorApiResponse", `Setting LED color to ${color} for ${ledsOption}.`);
+                postApiRequest(`http://127.0.0.1:3000/api/leds?color=${color.replace("#", "%23")}&leds=${ledsOption}`)
+                    .then((response) => {
+                        setElementText("setLedsColorApiResponse", response);
+                    })
+                    .catch((error) => {
+                        setElementText("setLedsColorApiResponse", `Error: ${error.message}`);
+                    });
+            }
+
+            function getDeviceSettings(event) {
+                event.preventDefault();
+
+                getSettings();
+            }
+
+            function setDeviceSettings(event) {
+                event.preventDefault();
+
+                setSettings(event.target.timeZone.value);
+            }
+
+            function getLedDiodesColor(event) {
+                event.preventDefault();
+
+                getLedsApi();
+            }
+
+            function setLedDiodesColor(event) {
+                event.preventDefault();
+
+                postLedsApi(event.target.ledsColor.value, event.target.ledsOption.value);
+            }
+
+            setInterval(() => {
+                const dateTimeString = getDateTimeString();
+
+                setElementText("timePlaceholder", dateTimeString);
+            }, 1000);
+        </script>
+    </head>
+    <body style="background: white; color: #333333; padding: 15px; margin: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1 style="margin: 10px 0;">Device API Test</h1>
+            <div id="timePlaceholder" style="font-size: 18px; font-weight: bold; width: 170px;"></div>
+        </div>
+        <hr>
+        <h3>Get Device LED diodes color</h3>
+        <form onsubmit="getLedDiodesColor(event)">
+            <div style="margin-bottom: 15px;">
+                Get LEDs color status: <span id="getLedsColorApiResponse" style="font-weight: bold;"></span>
+            </div>
+            <button type="submit" style="font-size: 14px; font-weight: bold; height: 45px; width: 150px; border: none; margin: 0; color: white; background-color: green; border-radius: 4px; border: none;">
+                Get LEDs color
+            </button>
+        </form>
+
+        <h3>Set Device LED diodes color</h3>
+        <form onsubmit="setLedDiodesColor(event)">
+            <div style="display: flex; flex-direction: row; margin-bottom: 25px; align-items: center; gap: 30px;">
+                <div>
+                    <input type="radio" id="red" name="ledsColor" value="#B40500" checked>
+                    <label for="red">Red</label>
+                </div>
+                <div>
+                    <input type="radio" id="orange" name="ledsColor" value="#A5B40F">
+                    <label for="orange">Orange</label>
+                </div>
+                <div>
+                    <input type="radio" id="green" name="ledsColor" value="#00B40C">
+                    <label for="green">Green</label>
+                </div>
+                <div>
+                    <input type="radio" id="blue" name="ledsColor" value="#0515C0">
+                    <label for="blue">Blue</label>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: row; margin-bottom: 15px; gap: 30px;">
+                <div>
+                    <input type="radio" id="all" name="ledsOption" value="all" checked>
+                    <label for="all">Both LEDs</label>
+                </div>
+                <div>
+                    <input type="radio" id="halo" name="ledsOption" value="halo">
+                    <label for="halo">Halo LEDs only</label>
+                </div>
+                <div>
+                    <input type="radio" id="logo" name="ledsOption" value="logo">
+                    <label for="logo">Logo LEDs only</label>
+                </div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                Set LEDs color status: <span id="setLedsColorApiResponse" style="font-weight: bold;"></span>
+            </div>
+            <button type="submit" style="font-size: 14px; font-weight: bold; height: 45px; width: 150px; border: none; margin: 0; color: white; background-color: green; border-radius: 4px; border: none;">
+                Set LEDs color
+            </button>
+        </form>
+        
+        <hr>
+        <h3>Get Device Time zone</h3>
+        <form onsubmit="getDeviceSettings(event)">
+            <div style="margin-bottom: 15px;">
+                Get Device Settings status: <span id="getDeviceSettingsResponse" style="font-weight: bold;"></span>
+            </div>
+            <button type="submit" style="font-size: 14px; font-weight: bold; height: 45px; width: 150px; border: none; margin: 0; color: white; background-color: green; border-radius: 4px; border: none;">
+                Get device settings
+            </button>
+        </form>
+        <h3>Set Device Time zone</h3>
+        <form onsubmit="setDeviceSettings(event)">
+            <div style="display: flex; flex-direction: row; margin-bottom: 15px; align-items: center; gap: 30px;">
+                <label style="margin-right: 20px;" for="timeZone">Select LED color</label>
+                <select style="height: 40px; font-size: 14px;" id="timeZone" name="timeZone" value="Europe/Stockholm">
+                    <option style="zoom: 140%; padding: 10px 0;" value="Europe/Stockholm">Europe/Stockholm</option>
+                    <option style="zoom: 140%; padding: 10px 0;" value="Europe/London">Europe/London</option>
+                    <option style="zoom: 140%; padding: 10px 0;" value="America/New_York">America/New_York</option>
+                    <option style="zoom: 140%; padding: 10px 0;" value="Australia/Sydney">Australia/Sydney</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                Set Device Settings status: <span id="setDeviceSettingsResponse" style="font-weight: bold;"></span>
+            </div>
+            <button type="submit" style="font-size: 14px; font-weight: bold; height: 45px; width: 150px; border: none; margin: 0; color: white; background-color: green; border-radius: 4px; border: none;">
+                Set device settings
+            </button>
+        </form>
+    </body>
+</html>
