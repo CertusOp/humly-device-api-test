@@ -1,4 +1,4 @@
-<html style="font-family: 'arial';">
+<html>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -43,13 +43,13 @@
             }
 
             function setSettings(timeZone) {
-                setElementText("setDeviceSettingsResponse", `Setting time zone to device.`);
+                setElementText("changeDeviceSettingsResponse", `Setting time zone to device.`);
                 postApiRequest(`http://127.0.0.1:3000/api/settings?timeZone=${timeZone}`)
                     .then((response) => {
-                        setElementText("setDeviceSettingsResponse", response);
+                        setElementText("changeDeviceSettingsResponse", response);
                     })
                     .catch((error) => {
-                        setElementText("setDeviceSettingsResponse", error.message);
+                        setElementText("changeDeviceSettingsResponse", error.message);
                     });
             }
 
@@ -82,7 +82,7 @@
                 getSettings();
             }
 
-            function setDeviceSettings(event) {
+            function changeDeviceSettings(event) {
                 event.preventDefault();
 
                 setSettings(event.target.timeZone.value);
@@ -106,26 +106,116 @@
                 setElementText("timePlaceholder", dateTimeString);
             }, 1000);
         </script>
+        <style>
+            html {
+                font-family: 'arial';
+            }
+
+            body {
+                background: white;
+                color: #333333;
+                padding: 15px;
+                margin: 0;
+            }
+
+            .title {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .title > h1 {
+                margin: 10px 0;
+            }
+
+            .title > div {
+                font-size: 18px;
+                font-weight: bold;
+                width: 170px;
+            }
+
+            .form-status-line {
+                margin-bottom: 15px;
+            }
+
+            .form-status-text {
+                font-weight: bold;
+            }
+
+            .form-elements-line {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 30px;
+            }
+
+            .form-elements-line select {
+                height: 40px; font-size: 14px;
+            }
+
+            .form-elements-line select option {
+                zoom: 140%;
+                padding: 10px 0
+            }
+
+            .form-element-label {
+                margin-right: 20px;
+            }
+
+            .color-radio-buttons {
+                margin-bottom: 25px;
+            }
+
+            .color-radio-buttons > div {
+                display: flex;
+                align-items: center;
+            }
+
+            .color-radio-buttons input,
+            .color-option-radio-buttons input {
+                width: 25px;
+                height: 25px;
+                margin: 0 10px 0 0;
+            }
+
+            .color-option-radio-buttons,
+            .time-zone-select-line {
+                margin-bottom: 15px;
+            }
+
+            .submit-button {
+                font-size: 14px;
+                font-weight: bold;
+                height: 45px;
+                width: 180px;
+                border: none;
+                margin: 0;
+                color: white;
+                background-color: green;
+                border-radius: 4px;
+                border: none;
+            }
+        </style>
     </head>
-    <body style="background: white; color: #333333; padding: 15px; margin: 0;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h1 style="margin: 10px 0;">Device API Test</h1>
-            <div id="timePlaceholder" style="font-size: 18px; font-weight: bold; width: 170px;"></div>
+    <body>
+        <div class="title">
+            <h1>Device API Test</h1>
+            <div id="timePlaceholder"></div>
         </div>
         <hr>
         <h3>Get Device LED diodes color</h3>
         <form onsubmit="getLedDiodesColor(event)">
-            <div style="margin-bottom: 15px;">
-                Get LEDs color status: <span id="getLedsColorApiResponse" style="font-weight: bold;"></span>
+            <div class="form-status-line">
+                Get LEDs color status: <span id="getLedsColorApiResponse" class="form-status-text"></span>
             </div>
-            <button type="submit" style="font-size: 14px; font-weight: bold; height: 45px; width: 150px; border: none; margin: 0; color: white; background-color: green; border-radius: 4px; border: none;">
+            <button type="submit" class="submit-button">
                 Get LEDs color
             </button>
         </form>
 
         <h3>Set Device LED diodes color</h3>
         <form onsubmit="setLedDiodesColor(event)">
-            <div style="display: flex; flex-direction: row; margin-bottom: 25px; align-items: center; gap: 30px;">
+            <div class="form-elements-line color-radio-buttons">
                 <div>
                     <input type="radio" id="red" name="ledsColor" value="#B40500" checked>
                     <label for="red">Red</label>
@@ -147,7 +237,7 @@
                     <label for="black">Black</label>
                 </div>
             </div>
-            <div style="display: flex; flex-direction: row; margin-bottom: 15px; gap: 30px;">
+            <div class="form-elements-line color-option-radio-buttons">
                 <div>
                     <input type="radio" id="all" name="ledsOption" value="all" checked>
                     <label for="all">Both LEDs</label>
@@ -161,10 +251,10 @@
                     <label for="logo">Logo LEDs only</label>
                 </div>
             </div>
-            <div style="margin-bottom: 15px;">
-                Set LEDs color status: <span id="setLedsColorApiResponse" style="font-weight: bold;"></span>
+            <div class="form-status-line">
+                Set LEDs color status: <span id="setLedsColorApiResponse" class="form-status-text"></span>
             </div>
-            <button type="submit" style="font-size: 14px; font-weight: bold; height: 45px; width: 150px; border: none; margin: 0; color: white; background-color: green; border-radius: 4px; border: none;">
+            <button type="submit" class="submit-button">
                 Set LEDs color
             </button>
         </form>
@@ -172,29 +262,29 @@
         <hr>
         <h3>Get Device Time zone</h3>
         <form onsubmit="getDeviceSettings(event)">
-            <div style="margin-bottom: 15px;">
-                Get Device Settings status: <span id="getDeviceSettingsResponse" style="font-weight: bold;"></span>
+            <div class="form-status-line">
+                Get Device Settings status: <span id="getDeviceSettingsResponse" class="form-status-text"></span>
             </div>
-            <button type="submit" style="font-size: 14px; font-weight: bold; height: 45px; width: 150px; border: none; margin: 0; color: white; background-color: green; border-radius: 4px; border: none;">
+            <button type="submit" class="submit-button">
                 Get device settings
             </button>
         </form>
         <h3>Set Device Time zone</h3>
-        <form onsubmit="setDeviceSettings(event)">
-            <div style="display: flex; flex-direction: row; margin-bottom: 15px; align-items: center; gap: 30px;">
-                <label style="margin-right: 20px;" for="timeZone">Select LED color</label>
-                <select style="height: 40px; font-size: 14px;" id="timeZone" name="timeZone" value="Europe/Stockholm">
-                    <option style="zoom: 140%; padding: 10px 0;" value="Europe/Stockholm">Europe/Stockholm</option>
-                    <option style="zoom: 140%; padding: 10px 0;" value="Europe/London">Europe/London</option>
-                    <option style="zoom: 140%; padding: 10px 0;" value="America/New_York">America/New_York</option>
-                    <option style="zoom: 140%; padding: 10px 0;" value="Australia/Sydney">Australia/Sydney</option>
+        <form onsubmit="changeDeviceSettings(event)">
+            <div class="form-elements-line time-zone-select-line">
+                <label class="form-element-label" for="timeZone">Select time zone</label>
+                <select id="timeZone" name="timeZone" value="Europe/Stockholm">
+                    <option value="Europe/Stockholm">Europe/Stockholm</option>
+                    <option value="Europe/London">Europe/London</option>
+                    <option value="America/New_York">America/New_York</option>
+                    <option value="Australia/Sydney">Australia/Sydney</option>
                 </select>
             </div>
-            <div style="margin-bottom: 15px;">
-                Set Device Settings status: <span id="setDeviceSettingsResponse" style="font-weight: bold;"></span>
+            <div class="form-status-line">
+                Change Device Settings status: <span id="changeDeviceSettingsResponse" class="form-status-text"></span>
             </div>
-            <button type="submit" style="font-size: 14px; font-weight: bold; height: 45px; width: 150px; border: none; margin: 0; color: white; background-color: green; border-radius: 4px; border: none;">
-                Set device settings
+            <button type="submit" class="submit-button">
+                Change device settings
             </button>
         </form>
     </body>
