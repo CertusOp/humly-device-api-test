@@ -146,7 +146,6 @@
                 display: flex;
                 flex-direction: row;
                 align-items: center;
-                gap: 30px;
             }
 
             .form-elements-line select {
@@ -156,6 +155,10 @@
             .form-elements-line select option {
                 zoom: 140%;
                 padding: 10px 0
+            }
+
+            .form-elements-line > *:not(:last-child) {
+                margin-right: 30px;
             }
 
             .form-element-label {
