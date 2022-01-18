@@ -30,9 +30,13 @@
                 document.getElementById(elementId).innerText = text;
             }
 
+            function getApiEndpoint() {
+                return document.getElementById("apiEndpoint").value;
+            }
+
             function getSettings() {
                 setElementText("getDeviceSettingsResponse", `Getting Settings from device.`);
-                fetch("http://127.0.0.1:3000/api/settings")
+                fetch(`${getApiEndpoint()}/api/settings`)
                     .then((response) => response.json())
                     .then((response) => {
                         setElementText("getDeviceSettingsResponse", response);
@@ -44,7 +48,7 @@
 
             function setSettings(timeZone) {
                 setElementText("changeDeviceSettingsResponse", `Setting time zone to device.`);
-                postApiRequest(`http://127.0.0.1:3000/api/settings?timeZone=${timeZone}`)
+                postApiRequest(`${getApiEndpoint()}/api/settings?timeZone=${timeZone}`)
                     .then((response) => {
                         setElementText("changeDeviceSettingsResponse", response);
                     })
@@ -55,7 +59,7 @@
 
             function getLedsApi() {
                 setElementText("getLedsColorApiResponse", `Getting LED colors from device.`);
-                fetch("http://127.0.0.1:3000/api/leds")
+                fetch(`${getApiEndpoint()}/api/leds`)
                     .then((response) => response.json())
                     .then((response) => {
                         setElementText("getLedsColorApiResponse", response);
@@ -67,12 +71,24 @@
 
             function postLedsApi(color, ledsOption) {
                 setElementText("setLedsColorApiResponse", `Setting LED color to ${color} for ${ledsOption}.`);
-                postApiRequest(`http://127.0.0.1:3000/api/leds?color=${color.replace("#", "%23")}&leds=${ledsOption}`)
+                postApiRequest(`${getApiEndpoint()}/api/leds?color=${color.replace("#", "%23")}&leds=${ledsOption}`)
                     .then((response) => {
                         setElementText("setLedsColorApiResponse", response);
                     })
                     .catch((error) => {
                         setElementText("setLedsColorApiResponse", `Error: ${error.message}`);
+                    });
+            }
+
+            function getNfcTagApi() {
+                setElementText("getNfcTagApiResponse", `Getting NFC tag from device.`);
+                fetch(`${getApiEndpoint()}/api/rfid`)
+                    .then((response) => response.json())
+                    .then((response) => {
+                        setElementText("getNfcTagApiResponse", response)
+                    })
+                    .catch((error) => {
+                        setElementText("getNfcTagApiResponse", error.message);
                     });
             }
 
@@ -98,6 +114,12 @@
                 event.preventDefault();
 
                 postLedsApi(event.target.ledsColor.value, event.target.ledsOption.value);
+            }
+
+            function readNfcTag(event) {
+                event.preventDefault();
+
+                getNfcTagApi();
             }
 
             setInterval(() => {
@@ -205,6 +227,14 @@
             <h1>Device API Test</h1>
             <div id="timePlaceholder"></div>
         </div>
+
+        <hr>
+        <h3>API Configuration</h3>
+        <div class="form-status-line">
+            Device API Endpoint:
+            <input id="apiEndpoint" value="http://127.0.0.1:3000" />
+        </div>
+
         <hr>
         <h3>Get Device LED diodes color</h3>
         <form onsubmit="getLedDiodesColor(event)">
@@ -288,6 +318,17 @@
             </div>
             <button type="submit" class="submit-button">
                 Change device settings
+            </button>
+        </form>
+
+        <hr>
+        <h3>Read NFC tag</h3>
+        <form onsubmit="readNfcTag(event)">
+            <div class="form-status-line">
+                Get NFC tag status: <span id="getNfcTagApiResponse" class="form-status-text"></span>
+            </div>
+            <button type="submit" class="submit-button">
+                Get NFC tag
             </button>
         </form>
     </body>
