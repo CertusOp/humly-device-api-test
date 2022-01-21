@@ -92,6 +92,17 @@
                     });
             }
 
+            function postNfcTag(scanNfcCallbackUrl) {
+                setElementText("scanNfcTagApiResponse", `Scanning NFC tag from device.`);
+                postApiRequest(`${getApiEndpoint()}/api/rfid?callbackUrl=${encodeURIComponent(scanNfcCallbackUrl)}`)
+                    .then((response) => {
+                        setElementText("scanNfcTagApiResponse", response)
+                    })
+                    .catch((error) => {
+                        setElementText("scanNfcTagApiResponse", error.message);
+                    });
+            }
+
             function getDeviceSettings(event) {
                 event.preventDefault();
 
@@ -120,6 +131,12 @@
                 event.preventDefault();
 
                 getNfcTagApi();
+            }
+
+            function scanNfcTag(event) {
+                event.preventDefault();
+
+                postNfcTag(event.target.scanNfcCallbackUrl.value);
             }
 
             setInterval(() => {
@@ -187,6 +204,13 @@
                 margin-right: 20px;
             }
 
+            .form-input {
+                height: 40px;
+                font-size: 20px;
+                min-width: 400px;
+                margin-left: 15px;
+            }
+
             .color-radio-buttons {
                 margin-bottom: 25px;
             }
@@ -204,7 +228,7 @@
             }
 
             .color-option-radio-buttons,
-            .time-zone-select-line {
+            .form-element-spacing {
                 margin-bottom: 15px;
             }
 
@@ -232,7 +256,7 @@
         <h3>API Configuration</h3>
         <div class="form-status-line">
             Device API Endpoint:
-            <input id="apiEndpoint" value="http://127.0.0.1:3000" />
+            <input id="apiEndpoint" class="form-input" value="http://127.0.0.1:3000" />
         </div>
 
         <hr>
@@ -304,7 +328,7 @@
         </form>
         <h3>Set Device Time zone</h3>
         <form onsubmit="changeDeviceSettings(event)">
-            <div class="form-elements-line time-zone-select-line">
+            <div class="form-elements-line form-element-spacing">
                 <label class="form-element-label" for="timeZone">Select time zone</label>
                 <select id="timeZone" name="timeZone" value="Europe/Stockholm">
                     <option value="Europe/Stockholm">Europe/Stockholm</option>
@@ -329,6 +353,19 @@
             </div>
             <button type="submit" class="submit-button">
                 Get NFC tag
+            </button>
+        </form>
+        <h3>Scan NFC tag</h3>
+        <form onsubmit="scanNfcTag(event)">
+            <div class="form-elements-line form-element-spacing">
+                Callback URL:
+                <input id="scanNfcCallbackUrl" name="scanNfcCallbackUrl" class="form-input" value="http://192.168.0.1:8088/accept-rfid-scan" />
+            </div>
+            <div class="form-status-line">
+                Scan NFC tag status: <span id="scanNfcTagApiResponse" class="form-status-text"></span>
+            </div>
+            <button type="submit" class="submit-button">
+                Scan NFC tag
             </button>
         </form>
     </body>
